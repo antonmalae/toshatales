@@ -1,0 +1,184 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String          @id @default(cuid())
+  email        String          @unique
+  role         UserRole        @default(USER)
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  fullName     String
+  isActive     Boolean         @default(true)
+  lastLoginAt  DateTime?       @map("last_login_at")
+  passwordHash String          @map("password_hash")
+  charLikes    CharacterLike[]
+  mediaFiles   MediaFile[]
+  stories      Story[]
+  storyLikes   StoryLike[]
+  ratings      StoryRating[]
+
+  @@map("users")
+}
+
+model Category {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  color       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  stories     Story[]
+
+  @@map("categories")
+}
+
+model Role {
+  id          String      @id @default(cuid())
+  name        String      @unique
+  description String?
+  type        String      @default("protagonist")
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  characters  Character[]
+
+  @@map("roles")
+}
+
+model Story {
+  id            String              @id @default(cuid())
+  title         String
+  description   String
+  content       String
+  readTime      String
+  ageGroup      String
+  status        StoryStatus         @default(DRAFT)
+  is_new        Boolean             @default(false) @map("is_new")
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  categoryId    String
+  authorId      String
+  image         String?
+  author        User                @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  category      Category            @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  audio         StoryAudio?
+  characters    StoryCharacter[]
+  illustrations StoryIllustration[]
+  likes         StoryLike[]
+  ratings       StoryRating[]
+
+  @@map("stories")
+}
+
+model Character {
+  id          String           @id @default(cuid())
+  name        String
+  description String
+  image       String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  roleId      String
+  likes       CharacterLike[]
+  role        Role             @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  stories     StoryCharacter[]
+
+  @@map("characters")
+}
+
+model StoryCharacter {
+  id          String    @id @default(cuid())
+  storyId     String
+  characterId String
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  story       Story     @relation(fields: [storyId], references: [id], onDelete: Cascade)
+
+  @@unique([storyId, characterId])
+  @@map("story_characters")
+}
+
+model StoryIllustration {
+  id                  String  @id @default(cuid())
+  imageUrl            String
+  caption             String?
+  order               Int
+  storyId             String
+  position_horizontal String  @default("left")
+  position_vertical   String  @default("top")
+  story               Story   @relation(fields: [storyId], references: [id], onDelete: Cascade)
+
+  @@map("story_illustrations")
+}
+
+model StoryAudio {
+  id       String @id @default(cuid())
+  audioUrl String
+  duration Int
+  storyId  String @unique
+  story    Story  @relation(fields: [storyId], references: [id], onDelete: Cascade)
+
+  @@map("story_audio")
+}
+
+model StoryRating {
+  id      String @id @default(cuid())
+  rating  Int
+  storyId String
+  userId  String
+  story   Story  @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([storyId, userId])
+  @@map("story_ratings")
+}
+
+model StoryLike {
+  id      String @id @default(cuid())
+  storyId String
+  userId  String
+  story   Story  @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([storyId, userId])
+  @@map("story_likes")
+}
+
+model CharacterLike {
+  id          String    @id @default(cuid())
+  characterId String
+  userId      String
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([characterId, userId])
+  @@map("character_likes")
+}
+
+model MediaFile {
+  id           String   @id @default(cuid())
+  filename     String
+  originalName String
+  mimeType     String
+  size         Int
+  url          String
+  createdAt    DateTime @default(now())
+  uploadedById String
+  uploadedBy   User     @relation(fields: [uploadedById], references: [id], onDelete: Cascade)
+
+  @@map("media_files")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum StoryStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
