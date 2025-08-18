@@ -3,7 +3,7 @@ version: '3.8'
 services:
   # PostgreSQL база данных
   postgres:
-    image: postgres:15-bullseye
+    image: postgres:15-alpine
     container_name: tosha_postgres
     environment:
       POSTGRES_DB: tosha_tales
@@ -67,7 +67,7 @@ services:
 
   # Nginx reverse proxy (для production)
   nginx:
-    image: nginx:bullseye
+    image: nginx:alpine
     container_name: tosha_nginx
     ports:
       - "80:80"
