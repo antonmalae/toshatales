@@ -1,4 +1,3 @@
-node_modules
 npm-debug.log
 .git
 .gitignore
@@ -8,3 +7,10 @@ README.md
 coverage
 .DS_Store
 *.log
+logs/
+public/
+scripts/
+migrate-illustrations.sql
+USER_MANAGEMENT_SETUP.md
+STATISTICS_SETUP.md
+INTEGRATION.md

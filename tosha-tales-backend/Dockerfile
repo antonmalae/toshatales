@@ -12,8 +12,8 @@ RUN apt-get update && apt-get install -y \
 COPY package*.json ./
 COPY prisma ./prisma/
 
-# Устанавливаем зависимости с retry
-RUN npm ci --only=production --retry 3 --retry-delay 1000
+# Устанавливаем зависимости
+RUN npm ci --only=production
 
 # Копируем исходный код
 COPY . .
