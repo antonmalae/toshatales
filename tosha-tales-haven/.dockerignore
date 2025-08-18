@@ -1,12 +1,10 @@
-node_modules
-npm-debug.log
+# Git
 .git
-.gitignore
-README.md
+
+# Переменные окружения
 .env
-.nyc_output
-coverage
+.env.*
+
+# Системные файлы
 .DS_Store
-*.log
-dist/
-.vite/
+Thumbs.db

@@ -1,16 +1,13 @@
-npm-debug.log
+# Git
 .git
-.gitignore
-README.md
+
+# Переменные окружения
 .env
-.nyc_output
-coverage
-.DS_Store
-*.log
+.env.*
+
+# Логи
 logs/
-public/
-scripts/
-migrate-illustrations.sql
-USER_MANAGEMENT_SETUP.md
-STATISTICS_SETUP.md
-INTEGRATION.md
+
+# Системные файлы
+.DS_Store
+Thumbs.db
