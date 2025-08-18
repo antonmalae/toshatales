@@ -17,24 +17,19 @@ RUN npm run build
 # Production stage
 FROM nginx:alpine
 
-# Создаем пользователя для безопасности
-RUN addgroup -g 1001 -S appuser && adduser -S appuser -G appuser
-
-# Создаем необходимые директории для Nginx
-RUN mkdir -p /run/nginx /var/cache/nginx /var/log/nginx
-
 # Копируем собранное приложение
 COPY --from=builder /app/dist /usr/share/nginx/html
 
 # Копируем конфигурацию nginx
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Устанавливаем права на все необходимые директории
-RUN chown -R appuser:appuser /usr/share/nginx/html /var/cache/nginx /var/log/nginx /etc/nginx/conf.d /run/nginx
+# Создаем пользователя для безопасности (но не переключаемся на него)
+RUN addgroup -g 1001 -S appuser && adduser -S appuser -G appuser
 
-# Переключаемся на непривилегированного пользователя
-USER appuser
+# Устанавливаем права на веб-директорию
+RUN chown -R appuser:appuser /usr/share/nginx/html
 
+# Открываем порт
 EXPOSE 3000
 
 # Health check
