@@ -64,9 +64,18 @@ DB_PASSWORD=tosha_password_2024
 JWT_SECRET=your_super_secret_jwt_key_2024_change_this_in_production
 
 # Домен (для production)
-DOMAIN=localhost
+DOMAIN=tosha-tales.ru
 EOF
     echo "⚠️  Создан .env файл с дефолтными значениями. Измените пароли для production!"
+fi
+
+# Проверяем SSL сертификаты для production
+if [ ! -d "./ssl" ]; then
+    echo "📁 Создаем директорию для SSL сертификатов..."
+    mkdir -p ssl
+    echo "⚠️  Поместите SSL сертификаты в папку ./ssl/"
+    echo "   - tosha-tales.ru.crt (сертификат)"
+    echo "   - tosha-tales.ru.key (приватный ключ)"
 fi
 
 # Останавливаем существующие контейнеры
@@ -81,7 +90,13 @@ fi
 
 # Собираем и запускаем
 echo "🔨 Собираем и запускаем контейнеры..."
-docker-compose up -d --build
+if [ "$1" = "--production" ]; then
+    echo "🚀 Запускаем в production режиме с Nginx..."
+    docker-compose --profile production up -d --build
+else
+    echo "🔧 Запускаем в development режиме..."
+    docker-compose up -d --build
+fi
 
 # Проверяем успешность запуска
 if [ $? -ne 0 ]; then
@@ -144,8 +159,8 @@ fi
 echo ""
 echo "🎉 Деплой завершен!"
 echo ""
-echo "📱 Frontend: http://localhost"
-echo "🔧 Backend API: http://localhost:3001"
+echo "📱 Frontend: https://tosha-tales.ru"
+echo "🔧 Backend API: https://tosha-tales.ru/api"
 echo "🗄️  База данных: localhost:5432"
 echo ""
 echo "📋 Полезные команды:"
@@ -154,4 +169,9 @@ echo "  docker-compose down             # Остановить все"
 echo "  docker-compose restart backend  # Перезапустить backend"
 echo "  docker-compose exec postgres psql -U tosha_user -d tosha_tales  # Подключиться к БД"
 echo ""
+echo "🚀 Для production деплоя:"
+echo "  ./deploy.sh --production       # Запуск с Nginx и SSL"
+echo "  ./deploy.sh --clean            # Полная очистка и пересборка"
+echo ""
 echo "⚠️  Не забудьте изменить пароли в .env файле для production!"
+echo "⚠️  Поместите SSL сертификаты в папку ./ssl/ для HTTPS"
