@@ -1,16 +1,12 @@
-FROM node:18-bullseye-slim
+FROM node:18-alpine
 
 WORKDIR /app
 
 # Создаем пользователя для безопасности
-RUN groupadd -r appuser && useradd -r -g appuser appuser
+RUN addgroup -g 1001 -S appuser && adduser -S appuser -G appuser
 
-# Устанавливаем необходимые пакеты для Ubuntu/Debian
-RUN apt-get update && apt-get install -y \
-    curl \
-    wget \
-    && rm -rf /var/lib/apt/lists/* \
-    && apt-get clean
+# Устанавливаем необходимые пакеты для Alpine
+RUN apk add --no-cache curl wget
 
 # Копируем package файлы
 COPY package*.json ./

@@ -1,4 +1,4 @@
-FROM node:18-bullseye-slim AS builder
+FROM node:18-alpine AS builder
 
 WORKDIR /app
 
@@ -15,10 +15,10 @@ COPY . .
 RUN npm run build
 
 # Production stage
-FROM nginx:bullseye-slim
+FROM nginx:alpine
 
 # Создаем пользователя для безопасности
-RUN groupadd -r appuser && useradd -r -g appuser appuser
+RUN addgroup -g 1001 -S appuser && adduser -S appuser -G appuser
 
 # Копируем собранное приложение
 COPY --from=builder /app/dist /usr/share/nginx/html
