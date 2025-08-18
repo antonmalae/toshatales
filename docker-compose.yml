@@ -33,6 +33,7 @@ services:
       RATE_LIMIT_WINDOW_MS: 900000
       RATE_LIMIT_MAX_REQUESTS: 100
       LOG_LEVEL: info
+      CORS_ORIGIN: https://tosha-tales.ru
     volumes:
       - ./tosha-tales-backend/uploads:/app/uploads
     ports:
@@ -54,10 +55,15 @@ services:
     environment:
       - VITE_API_BASE_URL=https://tosha-tales.ru/api
     ports:
-      - "80:80"
+      - "3000:3000"
     depends_on:
       - backend
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   # Nginx reverse proxy (для production)
   nginx:
@@ -67,12 +73,19 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./nginx-proxy.conf:/etc/nginx/conf.d/default.conf
+      - ./nginx-production.conf:/etc/nginx/conf.d/default.conf
       - ./ssl:/etc/nginx/ssl
     depends_on:
-      - frontend
-      - backend
+      frontend:
+        condition: service_healthy
+      backend:
+        condition: service_healthy
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     profiles:
       - production
 

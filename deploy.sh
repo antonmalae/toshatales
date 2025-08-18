@@ -150,7 +150,7 @@ else
 fi
 
 # Проверяем frontend
-if curl -f http://localhost &> /dev/null; then
+if curl -f http://localhost:3000 &> /dev/null; then
     echo "✅ Frontend доступен"
 else
     echo "❌ Frontend недоступен"

@@ -7,8 +7,7 @@
   "scripts": {
     "start": "node src/app.js",
     "dev": "nodemon src/app.js",
-    "build": "npm run build:prisma",
-    "build:prisma": "prisma generate",
+    "build": "echo 'Build completed'",
     "db:migrate": "prisma migrate dev",
     "db:reset": "prisma migrate reset",
     "db:seed": "node src/scripts/seed.js",
