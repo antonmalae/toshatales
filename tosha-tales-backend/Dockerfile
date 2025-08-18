@@ -12,14 +12,14 @@ RUN apt-get update && apt-get install -y \
 COPY package*.json ./
 COPY prisma ./prisma/
 
-# Устанавливаем зависимости
-RUN npm ci --only=production
-
-# Генерируем Prisma клиент
-RUN npx prisma generate
+# Устанавливаем зависимости с retry
+RUN npm ci --only=production --retry 3 --retry-delay 1000
 
 # Копируем исходный код
 COPY . .
+
+# Генерируем Prisma клиент
+RUN npx prisma generate
 
 # Создаем директорию для загрузок
 RUN mkdir -p uploads

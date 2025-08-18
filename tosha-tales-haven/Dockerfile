@@ -5,8 +5,8 @@ WORKDIR /app
 # Копируем package файлы
 COPY package*.json ./
 
-# Устанавливаем зависимости
-RUN npm ci
+# Устанавливаем зависимости с retry
+RUN npm ci --retry 3 --retry-delay 1000
 
 # Копируем исходный код
 COPY . .
