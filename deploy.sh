@@ -143,7 +143,7 @@ docker-compose ps
 echo "🔍 Проверяем доступность сервисов..."
 
 # Проверяем backend
-if curl -f http://localhost:3001/api/health &> /dev/null; then
+if curl -f http://localhost:3001/health &> /dev/null; then
     echo "✅ Backend API доступен"
 else
     echo "❌ Backend API недоступен"

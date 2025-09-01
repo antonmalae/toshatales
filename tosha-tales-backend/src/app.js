@@ -47,8 +47,16 @@ app.use(helmet({
 }));
 
 // CORS configuration
+const allowedOriginsEnv = process.env.CORS_ORIGIN || 'http://localhost:3000,http://localhost:5173,https://tosha-tales.ru,https://www.tosha-tales.ru';
+const allowedOrigins = allowedOriginsEnv.split(',').map(o => o.trim());
+
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:8080',
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error('Not allowed by CORS'));
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization'],
