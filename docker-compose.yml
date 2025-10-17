@@ -34,6 +34,9 @@ services:
       RATE_LIMIT_MAX_REQUESTS: 100
       LOG_LEVEL: info
       CORS_ORIGIN: https://tosha-tales.ru
+      # Prisma engine configuration for Alpine Linux
+      PRISMA_QUERY_ENGINE_LIBRARY: /app/node_modules/.prisma/client/libquery_engine-linux-musl.so.node
+      PRISMA_QUERY_ENGINE_BINARY: /app/node_modules/.prisma/client/query-engine-linux-musl
     volumes:
       - ./tosha-tales-backend/uploads:/app/uploads
     ports:
