@@ -2,7 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { z } from 'zod';
 import { logger } from '../utils/logger.js';
 
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
