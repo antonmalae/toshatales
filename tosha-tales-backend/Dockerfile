@@ -1,17 +1,16 @@
-FROM node:18-alpine
+FROM node:18-slim
 
 WORKDIR /app
 
 # Создаем пользователя для безопасности
-RUN addgroup -g 1001 -S appuser && adduser -S appuser -G appuser
+RUN groupadd -r appuser && useradd -r -g appuser appuser
 
-# Устанавливаем необходимые пакеты для Alpine, включая OpenSSL 1.1.x
-RUN apk add --no-cache \
+# Устанавливаем необходимые пакеты для Debian
+RUN apt-get update && apt-get install -y \
     curl \
     wget \
-    openssl1.1-compat \
-    libssl1.1 \
-    libcrypto1.1
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 
 # Копируем package файлы
 COPY package*.json ./
@@ -23,12 +22,8 @@ RUN npm ci --no-audit --no-fund --only=production=false
 # Копируем исходный код
 COPY . .
 
-# Устанавливаем переменные окружения для Prisma
-ENV PRISMA_QUERY_ENGINE_LIBRARY=/app/node_modules/.prisma/client/libquery_engine-linux-musl.so.node
-ENV PRISMA_QUERY_ENGINE_BINARY=/app/node_modules/.prisma/client/query-engine-linux-musl
-
-# Генерируем Prisma клиент с правильной платформой для Alpine
-RUN npx prisma generate --platform linux-musl
+# Генерируем Prisma клиент (стандартная платформа для Debian)
+RUN npx prisma generate
 
 # Удаляем devDependencies для production
 RUN npm prune --production
