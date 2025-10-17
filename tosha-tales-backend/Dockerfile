@@ -19,8 +19,14 @@ COPY prisma ./prisma/
 # Устанавливаем зависимости (включая devDependencies для Prisma)
 RUN npm ci --no-audit --no-fund --only=production=false
 
+# Проверяем, что все зависимости установлены
+RUN npm list --depth=0
+
 # Копируем исходный код
 COPY . .
+
+# Проверяем синтаксис приложения
+RUN node -c src/app.js
 
 # Генерируем Prisma клиент (стандартная платформа для Debian)
 RUN npx prisma generate

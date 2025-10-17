@@ -1,4 +1,4 @@
-FROM node:18-alpine AS builder
+FROM node:18-slim AS builder
 
 WORKDIR /app
 
@@ -15,7 +15,7 @@ COPY . .
 RUN npm run build
 
 # Production stage
-FROM nginx:alpine
+FROM nginx:latest
 
 # Копируем собранное приложение
 COPY --from=builder /app/dist /usr/share/nginx/html
@@ -34,6 +34,6 @@ EXPOSE 3000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD wget --no-verbose --tries=1 --spider http://localhost:3000/health || exit 1
+    CMD curl -f http://localhost:3000/health || exit 1
 
 CMD ["nginx", "-g", "daemon off;"]
