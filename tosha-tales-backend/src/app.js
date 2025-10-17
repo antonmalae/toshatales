@@ -28,7 +28,7 @@ import { requestLogger, errorLogger, batchLogger } from './middleware/requestLog
 import { logger } from './utils/logger.js';
 
 // Import database connection
-import './config/database.js';
+import { testConnection, prisma } from './config/database.js';
 
 // Load environment variables
 dotenv.config();
@@ -122,13 +122,28 @@ app.get('/images/:filename', (req, res) => {
 });
 
 // Health check endpoint
-app.get('/health', (req, res) => {
-  res.status(200).json({
-    status: 'OK',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-    environment: process.env.NODE_ENV,
-  });
+app.get('/health', async (req, res) => {
+  try {
+    // Test database connection
+    await prisma.$queryRaw`SELECT 1`;
+    
+    res.status(200).json({
+      status: 'OK',
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      environment: process.env.NODE_ENV,
+      database: 'connected'
+    });
+  } catch (error) {
+    res.status(503).json({
+      status: 'ERROR',
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      environment: process.env.NODE_ENV,
+      database: 'disconnected',
+      error: error.message
+    });
+  }
 });
 
 // API routes
@@ -178,23 +193,39 @@ app.use(errorLogger);
 // Error handling middleware
 app.use(errorHandler);
 
-// Start server
-app.listen(PORT, () => {
-  logger.info(`🚀 Server running on port ${PORT}`);
-  logger.info(`📚 Tosha Tales API is ready!`);
-  logger.info(`🌍 Environment: ${process.env.NODE_ENV}`);
-  logger.info(`🔗 Health check: http://localhost:${PORT}/health`);
-  logger.info(`📖 API docs: http://localhost:${PORT}/api`);
-});
+// Start server with database connection
+async function startServer() {
+  try {
+    // Wait for database connection
+    await testConnection();
+    
+    // Start Express server
+    app.listen(PORT, () => {
+      logger.info(`🚀 Server running on port ${PORT}`);
+      logger.info(`📚 Tosha Tales API is ready!`);
+      logger.info(`🌍 Environment: ${process.env.NODE_ENV}`);
+      logger.info(`🔗 Health check: http://localhost:${PORT}/health`);
+      logger.info(`📖 API docs: http://localhost:${PORT}/api`);
+    });
+  } catch (error) {
+    logger.error('❌ Failed to start server:', error);
+    process.exit(1);
+  }
+}
+
+// Start the server
+startServer();
 
 // Graceful shutdown
-process.on('SIGTERM', () => {
+process.on('SIGTERM', async () => {
   logger.info('SIGTERM received, shutting down gracefully');
+  await prisma.$disconnect();
   process.exit(0);
 });
 
-process.on('SIGINT', () => {
+process.on('SIGINT', async () => {
   logger.info('SIGINT received, shutting down gracefully');
+  await prisma.$disconnect();
   process.exit(0);
 });
 

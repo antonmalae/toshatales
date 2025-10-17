@@ -10,9 +10,15 @@ async function testConnection() {
   try {
     await prisma.$connect();
     logger.info('✅ Database connected successfully');
+    
+    // Test database with a simple query
+    await prisma.$queryRaw`SELECT 1`;
+    logger.info('✅ Database query test successful');
+    
+    return true;
   } catch (error) {
     logger.error('❌ Database connection failed:', error);
-    process.exit(1);
+    throw error;
   }
 }
 
