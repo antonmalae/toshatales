@@ -24,7 +24,7 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Создаем пользователя для безопасности (но не переключаемся на него)
-RUN addgroup -g 1001 -S appuser && adduser -S appuser -G appuser
+RUN groupadd -r appuser && useradd -r -g appuser appuser
 
 # Устанавливаем права на веб-директорию
 RUN chown -R appuser:appuser /usr/share/nginx/html
